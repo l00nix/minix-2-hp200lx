@@ -21,6 +21,8 @@ MNXNAT.COM
 The card may remain inserted during a reboot to DOS. The sequence explicitly
 reinitializes the PCMCIA/ATA path before MINIX starts.
 
+![The complete DOS-to-MINIX boot sequence](media/boot-sequence.jpg)
+
 ## Stage By Stage
 
 ### 1. `CARDIO.EXE`

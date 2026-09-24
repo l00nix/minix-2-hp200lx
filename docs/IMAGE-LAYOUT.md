@@ -56,4 +56,6 @@ sudo dd if=HP200LX-MINIX-2.0.2-native-1.0.img of=/dev/sdX bs=1M conv=fsync
 Replace `/dev/sdX` with the complete CF device. Do not append a partition
 number. Compare the full-device SHA-256 with the release checksum afterward.
 
-Release 1.0 is hardware-validated only on the matching 48 MB card geometry.
+The whole-device image has been hardware-validated on both 48 MB and 256 MB CF
+cards. A larger card retains unused capacity after the 48,103,424-byte image;
+the release does not resize its MINIX partition or filesystems automatically.

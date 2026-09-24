@@ -8,7 +8,10 @@ project with a persistent native MINIX filesystem on PCMCIA/CF.
 - Boots Mack's HP-compatible MINIX kernel through a DOS real-mode loader.
 - Reuses Richard Dubs's PCMCIA and BIOS INT 13 disk bridge.
 - Adds the CF initialization and validation sequence proven during ELKS work.
-- Mounts native persistent root and `/usr` filesystems from the 48 MB CF card.
+- Mounts native persistent root and `/usr` filesystems from PCMCIA/CF.
+- Boots the same image on tested 48 MB and 256 MB CF cards.
+- Supports a double-speed-modified HP 200LX when `DSPEED /R` is used before
+  booting MINIX to unload the DOS flicker workaround and recover its memory.
 - Includes a working HP 200LX keyboard and tested display-zoom combination.
 - Includes Mack's `volts` utility.
 - Uses hostname and prompt `HP200LX`.
@@ -23,5 +26,5 @@ project with a persistent native MINIX filesystem on PCMCIA/CF.
 ## Known Issues
 
 - ON/OFF resume may hang after the unit is powered back on.
-- Storage card compatibility beyond the tested 48 MB card is not established.
+- Not every PCMCIA/CF card and adapter combination has been tested.
 - PCMCIA networking is not included.

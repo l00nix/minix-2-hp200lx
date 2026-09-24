@@ -2,13 +2,16 @@
 
 This project runs **MINIX Release 2.0 Version 2** on an HP 200LX and uses a
 native MINIX filesystem on a PCMCIA/CompactFlash card for persistent storage.
-Release 1.0 has been validated on real HP 200LX hardware.
+Release 1.0 has been validated on both standard and double-speed-modified
+HP 200LX hardware.
+
+![MINIX 2.0.2 login prompt on an HP 200LX](docs/media/login.jpg)
 
 The HP 200LX still starts in DOS. A small DOS boot bundle configures the CF
 card, installs Richard L. Dubs's BIOS INT 13 bridge, loads Mack Baggette's
 HP-compatible MINIX kernel, and transfers control directly to it. MINIX then
 mounts the native card as `/` and `/usr`; it does not use a `MINIX.MNX`
-file-as-disk filesystem after boot.
+file-as-disk filesystem after boot, unlike DOSMINIX.
 
 > This is an experimental historical-computing project. Writing the image
 > overwrites the selected card. Verify the target device before continuing.
@@ -28,6 +31,8 @@ Release 1.0 includes:
 
 The release image starts cleanly without an unnecessary first-boot filesystem
 check. A genuinely unclean later shutdown still triggers MINIX's normal check.
+
+![Logged into persistent MINIX on the HP 200LX](docs/media/logged-in.jpg)
 
 ## Motivation And Lineage
 
@@ -63,17 +68,25 @@ MINIX and ELKS kernels.
 - Files survive `sync`, shutdown, and reboot.
 - The built-in keyboard works.
 - HP-specific key combinations tested so far, including display zoom, work.
+- A double-speed-modified HP 200LX is supported. Load `DSPEED` under DOS to
+  eliminate screen flicker, then run `DSPEED /R` before `MNXBOOT` to unload it,
+  recover its conventional memory, and avoid changing the MINIX handoff.
 - The CF card may remain inserted while rebooting into DOS; `MNXBOOT.BAT`
   reinitializes it before entering MINIX.
+- The same Release 1.0 image boots from both 48 MB and 256 MB CF cards. The card
+  does not need to be a particular model or exact size, but it must be at least
+  48,103,424 bytes and compatible with the HP 200LX PCMCIA adapter.
 - `volts` reports the main-battery voltage. It omits the decimal point, so
   `243` means approximately 2.43 V.
+
+![Mack's volts utility reporting battery voltage](docs/media/volts.jpg)
 
 ## Known Limitations
 
 - The HP ON/OFF function may work once, but resuming can hang. Do not rely on
   suspend/resume; save files, run `sync`, and shut down normally.
-- Release 1.0 is validated with the specific 48 MB CF geometry represented by
-  the image. Other card sizes and adapters are not release-supported yet.
+- CF cards and adapters vary; Release 1.0 has been tested with 48 MB and 256 MB
+  cards, but not every available model.
 - PCMCIA networking is not included or validated.
 - This is a research build for vintage hardware, not a maintained secure OS.
 
@@ -83,14 +96,15 @@ You need:
 
 - an HP 200LX that can boot to its internal DOS `C:` drive;
 - enough internal DOS space for the `MNXBOOT` directory;
-- a compatible 48 MB PCMCIA/CF card for MINIX;
+- a compatible PCMCIA/CF card at least 48,103,424 bytes in size;
 - a separate DOS-readable transfer card or another way to copy files to `C:`.
 
 1. Download both Release 1.0 assets:
    - `HP200LX-MINIX-2.0.2-native-1.0.img`
    - `MNXBOOT-Release-1.0.zip`
 2. Verify their SHA-256 checksums from the release page.
-3. Write the `.img` to the entire 48 MB CF device, not to a partition.
+3. Write the `.img` to the entire CF device, not to a partition. Capacity beyond
+   the 48,103,424-byte image remains unused.
 4. Extract the boot ZIP and copy its `MNXBOOT` directory to `C:\MNXBOOT` on
    the HP 200LX internal DOS drive.
 5. Insert the imaged native MINIX CF card.
@@ -130,6 +144,8 @@ MNXNAT.COM
 
 See [docs/BOOT-SEQUENCE.md](docs/BOOT-SEQUENCE.md) for the purpose of every
 stage and the comparison with the Dubs and ELKS paths.
+
+![The complete DOS-to-MINIX boot sequence](docs/media/boot-sequence.jpg)
 
 ## Filesystem Image
 
