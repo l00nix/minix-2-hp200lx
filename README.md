@@ -10,8 +10,8 @@ HP 200LX hardware.
 The HP 200LX still starts in DOS. A small DOS boot bundle configures the CF
 card, installs Richard L. Dubs's BIOS INT 13 bridge, loads Mack Baggette's
 HP-compatible MINIX kernel, and transfers control directly to it. MINIX then
-mounts the native card as `/` and `/usr`; it does not use a `MINIX.MNX`
-file-as-disk filesystem after boot, unlike DOSMINIX.
+mounts the native card as `/` and `/usr`; unlike DOSMINIX, it does not use a
+`MINIX.MNX` file-as-disk filesystem after boot.
 
 > This is an experimental historical-computing project. Writing the image
 > overwrites the selected card. Verify the target device before continuing.
