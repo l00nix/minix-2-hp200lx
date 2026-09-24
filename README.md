@@ -179,6 +179,19 @@ nasm -f bin -DHANDOFF -DNATIVE MNXLOAD.ASM -o MNXNAT.COM
 The checked-in `boot/MNXBOOT` binaries are the exact real-hardware-tested
 Release 1.0 files. Their hashes are recorded in `SHA256SUMS.txt`.
 
+## Additional Screenshots
+
+![MINIX process table on the HP 200LX](docs/media/process-memory.jpg)
+
+*`ps -axl` showing active MINIX tasks and processes, including each process's
+allocated size in the `SZ` column.*
+
+![Persistent MINIX filesystems and system identity](docs/media/filesystem-status.jpg)
+
+*`df` showing the native root filesystem on `/dev/hd1` and `/usr` on
+`/dev/hd1b`, followed by `uname -a` identifying the HP 200LX MINIX 2.0.2
+system.*
+
 ## Licensing
 
 MINIX 2.0.2 is subject to the Prentice-Hall educational and research license,
