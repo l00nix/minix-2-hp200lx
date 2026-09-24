@@ -1,0 +1,602 @@
+MINIX on the HP200LX
+
+by Dr. Richard L. Dubs
+
+(last updated:  July 1, 1998)
+
+Summary
+
+I have developed PCMCIA and BIOS INT13 Hard Disk Services for the HP200LX that 
+allow someone to boot MINIX from a PCMCIA ATA flash disk.  MINIX is not stable 
+yet on the 200LX, allowing you (at most) to login and type one command before it 
+crashes.  Nevertheless, I believe that by solving the PCMCIA problem, I have 
+solved one of the hard parts of getting MINIX to run on the HP200LX, and I'm 
+hoping that the Internet community will now help finish the job.  The PCMCIA and 
+BIOS services I have developed should be just as useful to boot and run LINUX-86 
+(ELKS) on the 200LX.
+
+The software I have developed is provided on my web page (www.erols.com/rld) for 
+download.
+
+Background
+
+This section provides background information on a number of topics related to 
+this project:
+
+MINIX
+The HP200LX
+PCMCIA ATA Flash Disks
+PCMCIA Services on the HP200LX
+BIOS INT13 Hard Disk Services
+Native MINIX File System
+
+MINIX
+
+MINIX is a small UNIX operating system that has been written for educational and 
+research purposes.  The full source code is available on the Internet; however I 
+highly recommend the fantastic book, "Operating Systems:  Design and 
+Implementation," [Ref 1] which includes the full source code for MINIX 2.0 on a 
+CD.
+
+MINIX can run on an 8086 processor.  However, it requires 100% hardware 
+compatibility with the IBM XT to run properly.  My goal was to see how far I 
+could get with booting MINIX on the HP200LX Palmtop with little or no changes to 
+the MINIX source code.
+
+The HP200LX
+
+The HP200LX is an amazing piece of technology.  It has an 80186 processor (which 
+for our purposes is simply an 8086 plus support hardware all on one chip) has 
+CGA video capability (in greyscale) using an LCD screen, and has a PCMCIA slot 
+for a modem, memory card, or other PCMCIA peripheral.  It has DOS built into ROM 
+and boots DOS automatically upon startup.  My model has 2Megs of RAM of which 
+640k is available for DOS applications, and the rest serves as a RAM Disk (C: 
+drive).  32Meg upgrades are now available for the 200LX.
+
+For anyone interested in pursuing this project the "HP200LX Developer's Guide" 
+[Ref 2] from Thaddeus Computing is a must have.
+
+PCMCIA ATA Flash Disks
+
+PCMCIA is another piece of amazing technology.  There are many kinds of PCMCIA 
+cards [Refs 3 and 4]; for this project, I will focus only on ATA Flash Disks.
+
+The ATA in "ATA Flash Disk" stands for AT-Attachment, the standard I/O 
+controller interface for hard disks.  Once an ATA Flash Disk is configured as an 
+I/O device, it appears just like a hard disk to the computer; when an I/O 
+command is sent to the PCMCIA card, the ATA controller interprets the command 
+and sends back results, just as if the command had been sent to a real hard 
+disk.  Once the card has been initially configured and activated, PCMCIA 
+services are no longer needed.
+
+The HP200LX has built-in software that allows one to mount a DOS filesystem on a 
+PCMCIA ATA Flash Disk as the A: drive; however, as far as I can tell, this 
+software does not configure the Flash Disk as an I/O device - rather, it 
+configures it as a memory-mapped device.
+
+PCMCIA Services on the HP200LX
+
+One of the reasons I believe this project has not, to the best of my knowledge, 
+been attempted before is the false information provided on the HP Palmtop 
+newsgroup.  People have reported that the HP200LX has a proprietary PCMCIA 
+controller, and that there are no Card and Socket Services available for it.  
+While the it is true that the PCMCIA controller in the 200LX is proprietary, 
+Socket Services 1.0 is built into the 200LX ROM and a very primitive Card 
+Services is provided as well.  These "Card" and Socket Services shield the 
+programmer from the proprietary nature of the hardware.  Once I had the HP200 
+Developer's Guide, the sample software that came with it, and a few good books 
+on PCMCIA [Refs 3 and 4], it was a simple matter to figure out how to activate a 
+PCMCIA Flash Disk as an I/O device so that I could use card just like a hard 
+disk. The program CARDIO.EXE provided in my software package activates a PCMCIA 
+card as an I/O device on the 200LX.
+
+BIOS INT13 Hard Disk Services
+
+When a computer boots, it typically looks to load the operating system into 
+memory from either a floppy drive or a hard disk.  Since the operating system is 
+not yet running, the computer cannot use the operating system's services to 
+perform this initial load. (Nor can use the operating system yet to print to the 
+screen, read from the keyboard, check the size of memory or perform any other 
+basic activity.)  For this reason, the computer has Basic Input and Output 
+Services (BIOS) built into ROM (or static ram) that provide these basic services 
+until the operating system can be loaded.
+
+Unfortunately, the HP200LX boots its operating system from ROM; it has no need 
+to boot from either a floppy disk or a hard disk.  For this reason, the 200LX 
+does not provide the BIOS service (called INT13) for reading from a hard disk.  
+Since MINIX uses this service when it boots, I wanted to provide this service.  
+By the way, even after the boot process is over, MINIX allows you to continue to 
+use this BIOS service to read from a hard disk.
+
+The program INT13.BIN provided in my software package is the INT13 Hard Disk 
+Service and the batch file BOOT.BAT installs it on the 200LX.  (My program 
+requires the PCMCIA card be in the I/O mode; I am certain that somebody could 
+write BIOS INT13 services to use the PCMCIA card in memory-mapped mode if they 
+so desired.)
+
+Note that my INT13 BIOS service does not provide ALL the INT13 services; it only 
+provides the ones that MINIX needs to boot and run (Read, Write, Reset, and Disk 
+Parameters).
+
+Native MINIX File System
+
+I chose to put a bootable, native MINIX File System on my PCMCIA card.    
+Putting a MINIX File System on the PCMCIA card is easy; however, making the 
+MINIX file system bootable is not.  In fact, since I already provide the PCMCIA 
+and BIOS Services, making the file system bootable is the only hard part left 
+for the reader to do.  (I provide guidance below).
+
+Note that this part would be simple (just install MINIX as if installing to a 
+hard disk) if MINIX supported PCMCIA, but unfortunately it does not.  [Please 
+see Ref 5].
+
+The Details
+
+This section outlines what you need to do to get MINIX to boot on the HP200LX.  
+(Note that this is still a hacker's project and this section is definitely not 
+for the squeamish.)  Sometimes I skip over details, either because I don't 
+remember them (like the correct flags for the mkfs command), or I think you can 
+figure it out yourself.  In other cases, I provide extra tidbits of information 
+which may not be directly related to the task at hand, but may save you some 
+time or may be otherwise valuable or interesting to you.
+
+This section is divided into the following subsections:
+
+My Approach
+What You'll Need
+Tools I Provide
+Putting a Minix File System on a PCMCIA Card
+Making the Minix File System Bootable
+Let's boot MINIX!
+
+My Approach
+
+As stated earlier, the HP200LX boots into DOS from ROM upon startup and there is 
+not much you can do about it.  For this reason, I decided that the simplest 
+thing to do was to let the HP200LX boot to DOS, and then boot MINIX from the DOS 
+prompt.
+
+ ******************************************************************
+TECHNICAL SIDEBAR:  When DOS loads on a computer, it messes around with the 
+software interrupt vectors that are available upon bootup.  If you then want to 
+switch to another operating system, you first have to undo what DOS has done 
+before the new operating system can boot.  This is certainly the case when I 
+want to boot MINIX from DOS on my laptop, for example.  Fortunately, people have 
+written programs that capture the interrupt vectors in their "virgin" state 
+before DOS messes with them, so that these captured interrupts can be restored 
+and used to boot the other operating system.
+
+The good news is that you don't have to capture these "virgin" interrupts on the 
+HP200LX (It would be very hard to do in any case since DOS loads from ROM).  As 
+long as you install the INT13 service, all the other ones that MINIX uses upon 
+bootup seem to work just fine even though DOS boots up first.  Lucky us!
+ ******************************************************************
+What You'll Need
+
+I used a variety of tools to accomplish this task.  Each had its own special use 
+and convenience for me in this project.
+
+Here are some things you will need:
+
+1.  A way to put a MINIX file system on the PCMCIA Card - LINUX (2.0 and later) 
+has PCMCIA support and makes it trivial to create a MINIX file system on the 
+PCMCIA card.
+
+2.  A way to make the PCMCIA card bootable - You are going to need a way to read 
+and write individual sectors on the PCMCIA card so that you can make the MINIX 
+file system bootable.  You can do this from LINUX if you want (you are on your 
+own here since I did not do it this way), or you can do this with your palmtop 
+if you want.  I did it from a DOS box in WINDOWS 95 using the BIOSDISK command 
+provided with BORLAND TURBO C++.  In the software package, I include some sample 
+source code to help you.
+
+[Note that if you choose to do this from your palmtop follow the instructions 
+(provided later) to activate the PCMCIA card and install the BIOS INT13 
+services.  The Turbo C++ BIOSDISK call will then work as advertised.  By the 
+way, Turbo C++ 1.0 runs fine on the LX!]
+
+3.  The 16-bit version of MINIX with source code - you are going to have to 
+recompile the boot monitor program so you need to have access to a running 
+version of 16-bit MINIX with source code. (I can't remember if the 32-bit 
+version of MINIX compiles boot monitor than will run on an 8086 - feel free to 
+try it!)
+
+4.  A PCMCIA ATA Flash Disk with boot sector access- you must have a Flash Disk 
+that allows you to write to the master boot sector (0, 0, 1).  For example I 
+used a SimpleTech 20Meg ATA Flash Disk which worked fine; however, I also have 
+an IBM Sundisk 10Meg card which does not allow master boot sector access and 
+would therefore be unsuitable for this project.
+
+************************************************************************
+Technical Sidebar:  I am not a big fan of WINDOWS, but I have to admit that 
+WINDOWS 95 has one incredibly cool feature:  it allows you to designate pseudo-
+hard disks (like a PCMCIA ATA Flash Disk) as an INT13 device so that BIOS INT13 
+calls (such as used by the TURBO C++ BIOSDISK command) can read and write from 
+the PCMCIA card!  (Note - I found that once you remove the PCMCIA card, the 
+INT13 services don't work upon reinsertion of the card).
+************************************************************************
+
+Tools I Provide
+
+In the software package, I provide the executables and source code (written in 
+C) for a number of programs that will help you create a bootable MINIX file 
+system on the PCMCIA card.  On the palmtop, most of these programs require you 
+to first activate the PCMCIA card and install the BIOS INT13 services that I 
+provide.
+
+WARNING:  SOME OF THE PROGRAMS I PROVIDE WRITE TO THE PCMCIA CARD.  IF NOT USED 
+PROPERLY, THESE PROGRAMS CAN WRITE TO A HARD DISK AND RUIN EXISTING SECTORS AND 
+PARTITIONS ON THE HARD DISK.  MAKE SURE YOUR CLEARLY UNDERSTAND THE SOURCE CODE 
+(ESPECIALLY THE BIOSDISK CALLS) BEFORE YOU USE THESE PROGRAMS.  RUNNING THESE 
+PROGRAMS ON THE PALMTOP WILL PROTECT FROM ACCIDENTLY RUINING HARD DISKS ON OTHER 
+COMPUTERS.
+
+Note:  Throughout this article, sectors are designated as (c, h, s) where 
+c=cylinders, h=heads, and s=sectors.
+
+OK.  Here are the programs I provide:
+
+bios512.exe, bios256.exe  - When you to type in a cylinder, head, and sector 
+number (spaces between them) these programs will print out the requested sector 
+from the PCMCIA card.  bios512.exe prints out the full 512 byte sector (the top 
+of which quickly scrolls off the screen) and bios256.exe prints out the top 256 
+bytes of the sector.  Type a key to get the next sector and use CONTROL C to 
+exit.  These programs will help you read the partition table (Sector (0, 0, 1), 
+and the Bootblock code (Sector (0, 1, 1)) as well as search for the Boot Monitor 
+program within the MINIX file system (discussed later).
+
+poke004.exe - This program will read a 512 byte sector (cylinder, head, and 
+sector specified in the source code at the top of the program), change some of 
+the bytes, and then rewrite the sector on the PCMCIA card.  
+
+newboot.exe - This program will read in a file and write it to a user-specified 
+sector on the Flash Disk.  This program will be useful to install the MINIX 
+Bootblock program into Sector (0,1,1).
+
+findbt2.exe - This program will read through all the sectors on you PCMCIA ATA 
+Flash Disk (or hard drive) and find a sector that starts with a user-specified 
+set of bytes.  This program will help you figure out exactly where the MINIX 
+Boot Monitor code is stored on the Flash Card.  I have had to reboot the 
+computer after running this program.
+
+poke001.exe - This program will poke a bootable primary partition table onto 
+Sector (0, 0, 1).  You should not need to use this program; however, if you do, 
+you will need to tailor the partition table to your particular PCMCIA card's (c, 
+h, s) configuration.
+
+Putting a MINIX File System on the PCMCIA Card
+
+As stated earlier, this step is straightforward.  Simply format the PCMCIA card 
+using LINUX just as you would any other hard disk and then use MKFS to make a 
+Minix filesystem.  This will make one big MINIX partition - there is no need to 
+make separate subpartitions for root and usr.
+
+Once the MINIX filesystem is created, you have to mount the filesystem and 
+install all the Minix software on it.  I copied the Minix 2.0 software from the 
+CD that comes with Reference [1] onto my LINUX partition, uncompressed it, and 
+copied and untarred it onto the Minix filesystem.  Nothing to it.
+
+There are two special things you are now going to have to do.  First, find the 
+tinyroot kernel on the CD and copy it to the PCMCIA card to the /minix 
+directory. (I seem to remember the steps to do this was a little convoluted but 
+I am sure you can figure it out.)  The tinyroot kernel is made to run on an X86 
+with a small amount of memory (640k for the XT) and it already has the MINIX 
+BIOS disk device driver compiled in.
+
+The second thing that you have to do is recompile the MINIX Boot Monitor program 
+because some boot variables have to be changed (I found this out empirically).  
+In the file /usr/src/boot/boot.h change the following variables to the following 
+values:
+
+HEADERPOS		0x7d00
+MINIXPOS		0x8000
+FREEPOS		0xF800 
+
+These changes have to be made because for some unknown reason, the HP200LX will 
+not allow MINIX to load and run at MINIXPOS = 0x800 or other low value.  
+(Understanding the reason for this may be the key to why MINIX is unstable on 
+the LX; certainly this change steals available memory from MINIX).
+
+Recompile by typing "make" (no quotes) in the same /usr/src/boot directory and 
+copy the resulting file named "boot" to the PCMCIA card's root (/) directory.  
+(For me this meant copying the file to a floppy - either MSDOS or MINIX 
+formatted - and then using LINUX to do the transfer.)
+
+Making the Minix File System Bootable
+
+This is the hardest part of the project.  Some of the tools and information I 
+provide should help.
+
+First some background:  When MINIX boots, it runs a small Bootblock program from 
+sector (0, 1, 1) that loads and runs the Minix Boot Monitor Program.  The Boot 
+Monitor Program, in turn, allows various boot variables to be set by the user, 
+and is the program that ultimately loads and runs MINIX. (By the way, the Boot 
+Monitor Program runs rock solidly on the HP200LX!) 
+
+Under normal circumstances, MINIX installs the Bootblock program as part of the 
+installation process.  MINIX tells the Bootblock program where the Boot Monitor 
+Program is located on the MINIX partition.  However, the Bootblock program is 
+crude (after all, it fits in just 512 bytes!) and does not understand the 
+concept of a MINIX filesystem.  Therefore MINIX must identify the position of 
+the Boot Monitor Program in terms of raw sectors.
+
+In our case, MINIX is not installing the Bootblock program (remember MINIX has 
+no PCMCIA support) - instead we are.  This means that we have to determine, in 
+terms of raw sectors, where the MINIX Boot Monitor Program is on the PCMCIA card 
+and pass this information to the Bootblock program.
+
+Unfortunately, the position of the Boot Monitor Program can vary from 
+installation to installation.  I cannot just tell you where it is on your PCMCIA 
+card; rather, I need to tell you how to determine the location of the Boot 
+Monitor Program for yourself.  That's the tricky part of this whole project.
+
+O.K. Enough background.  To make the MINIX filesystem bootable, you have to 
+complete four steps:
+
+Step 1:  Make sure the partition table in Sector (0,0,1) has the MINIX partition 
+marked as bootable.  This can be done simply with the FDISK program in LINUX or, 
+if you are brave, you can poke the correct value (0x80) into the first byte of 
+the partition table yourself.  (The program poke001.exe is set up to poke a 
+partition table into Sector (0, 0, 1); however, you should not need to use it.)
+
+Step 2:  Copy the Bootblock binary to Sector (0, 1, 1).  The program newboot.exe 
+should help here.  Make sure that the filename listed in the source code matches 
+the name of the Bootblock binary and that the output sector is correctly set in 
+the source code.
+
+Step 3:  Determine, in terms of raw sectors, the location of the MINIX Boot 
+Monitor Program on the Flash Card.  The program findbt2.exe will help you do 
+this.
+
+Step 4:  Set the "special" bytes that tell the Bootblock program the location of 
+the MINIX Boot Monitor Program.  The program poke004.exe will help you do this.
+
+The rest of this section addresses how to achieve Steps 3 and 4.
+
+I am going to discuss Step 4 first.  The MINIX Boot Monitor Program is 
+approximately 42 sectors long.  In all the cases I have seen it installed, it is 
+not installed on 42 consecutive sectors; rather, it is broken up into two sets 
+of consecutive sectors.  On my PCMCIA Card, the MINIX Boot Monitor Program is 
+broken into one set of 14 consecutive sectors (0e sectors hex), and one set of 
+28 consecutive sectors (1c sectors hex) for a total of 42 sectors.
+
+The Bootblock program is 294 bytes long, occupying byte numbers 0 through 293 on 
+Sector (0, 1, 1).  The information providing the location of the MINIX Boot 
+Monitor Program starts at byte number 294.  For each of the two sets of 
+consecutive sectors comprising the Boot Monitor Program, there are 4 special 
+bytes after the Bootblock program that state where the consecutive sectors are, 
+and how many sectors are in the set.  So in my case, there are 8 bytes of 
+information, corresponding to the two consecutive sets.  Here are my 8 bytes:
+
+0e 50 05 00 1c 60 05 00
+
+where
+
+0e is the number of sectors in the first consecutive set (14 sectors)
+
+50 05 00 is the relative sector number of the first sector of the first 
+consecutive set.  (The relative sector in my case is Sector 1360 or 0x000550. - 
+remember that PCs store their data endian swapped so the bytes are stored 
+backward.)
+
+1c is the number of sectors in the second consecutive set (28 sectors)
+
+60 05 00 is the relative sector number of the first sector of the second 
+consecutive set.  (The relative sector in my case is Sector 1376 or 0x000560) 
+
+The only question that remains is:  how did I determine the relative Sector 
+numbers (Step 3)?  Remember that your relative Sector numbers will probably be 
+different.
+
+[My method for determining the relative Sector numbers is admittedly brute force 
+- I am certain there is a more elegant, reliable way to do this by writing a 
+quick program in LINUX to extract the requisite information via the I-Node 
+table.]
+
+First, I have MINIX loaded on my laptop, and I determined the location of all 
+the MINIX Boot Monitor sectors on my hard disk.  I then put the first 16 bytes 
+of the first sector into the program findbt2.exe and searched my PCMCIA card for 
+the same bytes.  That gave me the first sector of the Boot Monitor program on my 
+Flash Disk.  In my case it was at (21, 1, 17) which for my PCMCIA card (615 
+cylinders, 2 heads, 32 sectors) is 1360 or 0x000550 sectors from Sector (0, 1, 
+1).  I then used the program bios256.exe to see how many consecutive sectors 
+there were (there were 14) and determined which sector must be the first sector 
+of the second consecutive set.  I knew what that sector looked like from my hard 
+disk, so I was able to figure out the 16 bytes I had to look for next on my 
+PCMCIA card.  I modified findbt2.exe accordingly, and found the sector I was 
+looking for.  This sector was at (22, 0, 1), just 1376 or 0x000560 bytes from 
+Sector (0, 1, 1).  Using bios256.exe again confirmed that this second 
+consecutive set consisted of 28 sectors.
+
+Note:  The program findbt2.exe will probably find more than one copy of "boot" 
+on your PCMCIA card; the first one found is most likely the one in your root 
+directory.
+
+***********************************************************************
+Technical Sidebar:  Without providing an exhaustive discussion on cylinders, 
+heads, and sectors, let me just say that the order of sector count in my case 
+(615 cylinders, 2 heads, 32 sectors) is as follows:
+
+C, H, S
+0, 0, 1
+0, 0, 2
+...
+0, 0, 32
+
+0, 1, 1
+0, 1, 2
+...
+0, 1, 32
+
+1, 0, 1
+1, 0, 2
+...
+1, 0, 32
+etc.
+
+This should provide you with enough information to derive the relative sector 
+numbers for both my case and your own case.
+
+***********************************************************************
+
+Let's Boot MINIX!
+
+In theory, to Boot MINIX you need to do the following things (first three steps 
+can be done in any order):
+
+1.  Activate the PCMCIA ATA Flash Disk into I/O mode
+2.  Load the INT13 BIOS Service into Memory
+3.  Change the INT13 software interrupt vector to point to the INT13 BIOS 
+Service you just loaded
+4.  Load the MINIX Bootblock and run it.
+
+I have automated these steps to make it easy for you.  First make sure the 
+following programs are in your root c:\ directory
+
+cardio.exe
+put13.exe
+int13.bin
+vector.dat
+boot.bat
+
+I recommend booting your computer into DOS WITHOUT the PCMCIA card inserted. 
+Then turn off the palmtop, insert the card, and turn the palmtop back on [See 
+Reference 6].
+
+[NOTE:  In the following instructions, press RETURN after typing the word in 
+quotes]
+
+You only need to perform two steps:
+
+1.  Run cardio.exe by typing "cardio".  This will put your ATA flash disk in I/O 
+mode.  You can usually hear a little click in the HP200LX speaker when this 
+happens.
+
+2.  Run boot.bat by typing "boot".  This will run put13.exe to install the INT13 
+services (int13.bin) at 9000:0000 and will install the software interrupt vector 
+to point to the INT13 service (by running DEBUG and executing the command "e 
+0000:004c 00 00 00 90").  Note if you want to change the location of the INT13 
+service, you have to edit both vector.dat AND put13.c (then recompile the 
+latter).  Finally boot.bat will run wini200.exe which will load and run the 
+MINIX Bootblock program from sector (0, 1, 1).
+
+If everything worked correctly, you should now be at the MINIX Boot Monitor 
+Screen.  Before you boot MINIX press ESC to change some of the boot parameters.  
+First type "set" to see the current boot parameters.  Notice that the Boot 
+Monitor correctly detected the CPU, VIDEO and other hardware characteristics. 
+[See Boot Monitor screen shot on my web page]
+
+You need to change two of the boot variables.  Type the following:
+
+rootdev = bootdev
+image = /minix/tinyroot
+
+Then type "save" so that the Boot Monitor saves the new values to the flash 
+disk.  (By the way, if you want to see the values you just entered, take a look 
+at sector (0,1,2)!  Also, if you look closely at the Boot Monitor screen shot, 
+you will discover that I changed the name "tinyroot" to "2.0.0.tiny" on my 
+PCMCIA card.)
+
+OK, it's time to boot MINIX.  Type "menu" and then press the equals ("=") key.
+
+MINIX SHOULD START TO BOOT!
+
+Here is what happens next.  On my palmtop, MINIX always gets passed the MEMORY 
+line, but often crashes (just stops working) before it gets to the login prompt.  
+Sometimes it gets to the login prompt and I can log in, but I can never get 
+passed one or two commands before it crashes.  [See MINIX screen shot on my web 
+page] In this case, since the file system does not shut down correctly, the next 
+time I boot I get an fsck error (further aggravated by the fact that fsck can't 
+handle the MINIX V1 filesystem created by LINUX).    To make the boot process 
+simpler (and to create a nicer looking picture for my web page), I commented out 
+the line in /etc/rc that runs fsck (using LINUX).  I also commented out the TIME 
+program, which asks the user to type in a time on every reboot of an 8086.
+
+
+Where to go from here
+
+I have tried a number of things to get MINIX to run smoothly with no avail.  I 
+have tried eliminating some of the device drivers from the MINIX kernel (like 
+the printer driver), I have tried having the video device driver use BIOS calls 
+and I have played with a lot of the adjustable parameters in the .h files.  No 
+joy.  The crashing is unpredictable and happens at different times in the boot 
+process.  I have noticed that smaller MINIX kernels have a somewhat better 
+chance at getting to a login prompt.  This may reflect the memory deficiency 
+problem related to changing the MINIXPOS variable as discussed earlier.
+
+Another potential problem may be with the host of special HP200LX functions 
+associated with IRQ2.  MINIX doesn't capture this interrupt but it may have to 
+if it is to work correctly.
+
+One thing I noticed is that my SimpleTech card is very noisy; that is, when I 
+use it in LINUX it works, but it often generates spurious signals (which show up 
+as error messages).  There is a very slight chance that these spurious signals 
+are the problem on the palmtop and that if you use a different ATA flash disk, 
+MINIX will run fine (OK, I can dream, can't I?)
+
+
+Other things to try
+
+The approach I have outlined for this project is simply the way I chose to 
+tackle the problem; there are certainly other approaches.
+
+With the PCMCIA and BIOS Services that I provide, the only hard part of this 
+project is to determine and then poke the raw sector location of the Boot 
+Monitor onto the Flash Disk.  However recent developments in the MINIX community 
+may obviate the need to do this.  Kees Bot has developed a capability to create 
+a MINIX filesystem INSIDE a big DOS file.  If this capability were available in 
+the 16-bit version of MINIX, it would be possible to run the DOS version of the 
+Boot Monitor (available) on the Palmtop, use the "MINIX in DOS" filesystem on 
+the PCMCIA card and avoid the raw sector determination problem completely (you 
+would still need my PCMCIA and BIOS Services to run MINIX from the Flash Disk - 
+you will not be able to run from the C:\  ram drive).  Unfortunately, I do not 
+think a 16-bit version of Kees work is available yet.
+
+However, it has been reported that you can now run MINIX inside a Windows 95 DOS 
+window!  If this is the case, you may be able to take advantage of the fact that 
+Windows 95 has PCMCIA services, and simply run MINIX in a DOS window and install 
+a native MINIX file system on the PCMCIA card!
+
+
+Final Thoughts
+
+In this article, I've focused my attention on getting MINIX to run on the 
+HP200LX.  However, the PCMCIA and BIOS services should be equally useful to 
+someone trying to get LINUX-86 (ELKS) to run.  How about a race to see which 
+community can get a stable version working on the HP200LX first?
+
+I hope someone takes an interest in this project and figures out how to achieve 
+"UNIX in your pocket".  With 32Meg of ram now available for the 200LX, it should 
+not be long before drivers exist to run UNIX off the LX's ram disk file system!
+
+I would be delighted to receive comments on this project.  Please don't hesitate 
+to contact me at rld@erols.com.
+
+
+References
+
+[1]  Operating Systems:  Design and Implementation, Second Edition, Andrew S. 
+Tannenbaum and Albert S. Woodhull, Prentice Hall 1998.
+
+[2]  The HP100LX/HP200LX Developer's Guide, Hewlett Packard, October 1994.
+
+[3] PCMCIA Primer, Larry Levine, M&T Books, 1995.
+
+[4] PCMCIA Programming, Dana L. Beatty, Steven M. Kipisz, and Brian E. Moore, 
+Peer-to-Peer Communications, 1996
+
+[5]  I have read on the MINIX newsgroup that people have been successful at 
+activating a PCMCIA I/O card under DOS and then booting to MINIX and using the 
+I/O card; this method would be worth pursuing with an ATA Flash disk as it may 
+be easier to make a bootable MINIX file system this way than the method I 
+describe herein.
+
+[6]  It takes a long time for the HP200LX to boot to DOS with a PCMCIA card 
+inserted that does not have a DOS filesystem.  That's why I recommend booting 
+your LX to DOS without the PCMCIA card inserted.  (Note:  I tried to put more 
+than one partition on the PCMCIA card, but the HP200LX did not seem to like 
+that, even if the first partition was DOS.  LINUX however, liked it just fine 
+and would mount both independently or even simultaneously with no problem.)
+
+
+

@@ -1,0 +1,11 @@
+*.ASM text eol=crlf
+*.BAT binary
+*.BIN binary
+*.COM binary
+*.DAT binary
+*.EXE binary
+*.SYS binary
+*.TXT text
+*.md text eol=lf
+docs/original/* -diff
+licenses/* -diff
