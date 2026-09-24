@@ -88,7 +88,7 @@ MINIX and ELKS kernels.
 - `volts` reports the main-battery voltage. It omits the decimal point, so
   `243` means approximately 2.43 V.
 
-![Mack's volts utility reporting battery voltage](docs/media/volts.jpg)
+![Mack's volts utility reporting battery voltage](docs/media/volts.png)
 
 *Mack's `volts` utility reporting 2.56 V; its output is expressed in hundredths
 of a volt.*
