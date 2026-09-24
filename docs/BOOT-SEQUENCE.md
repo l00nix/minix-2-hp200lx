@@ -23,6 +23,9 @@ reinitializes the PCMCIA/ATA path before MINIX starts.
 
 ![The complete DOS-to-MINIX boot sequence](media/boot-sequence.jpg)
 
+*The DOS-side card initialization, ATA check, and `MNXNAT` handoff immediately
+before entering MINIX.*
+
 ## Stage By Stage
 
 ### 1. `CARDIO.EXE`

@@ -7,6 +7,8 @@ HP 200LX hardware.
 
 ![MINIX 2.0.2 login prompt on an HP 200LX](docs/media/login.jpg)
 
+*MINIX Release 2.0 Version 2 at the HP 200LX login prompt.*
+
 The HP 200LX still starts in DOS. A small DOS boot bundle configures the CF
 card, installs Richard L. Dubs's BIOS INT 13 bridge, loads Mack Baggette's
 HP-compatible MINIX kernel, and transfers control directly to it. MINIX then
@@ -33,6 +35,9 @@ The release image starts cleanly without an unnecessary first-boot filesystem
 check. A genuinely unclean later shutdown still triggers MINIX's normal check.
 
 ![Logged into persistent MINIX on the HP 200LX](docs/media/logged-in.jpg)
+
+*Logged in as root with native `/` and `/usr` filesystems mounted from the
+PCMCIA/CF card.*
 
 ## Motivation And Lineage
 
@@ -80,6 +85,9 @@ MINIX and ELKS kernels.
   `243` means approximately 2.43 V.
 
 ![Mack's volts utility reporting battery voltage](docs/media/volts.jpg)
+
+*Mack's `volts` utility reporting 2.56 V; its output is expressed in hundredths
+of a volt.*
 
 ## Known Limitations
 
@@ -146,6 +154,9 @@ See [docs/BOOT-SEQUENCE.md](docs/BOOT-SEQUENCE.md) for the purpose of every
 stage and the comparison with the Dubs and ELKS paths.
 
 ![The complete DOS-to-MINIX boot sequence](docs/media/boot-sequence.jpg)
+
+*The DOS-side card initialization, ATA check, and `MNXNAT` handoff immediately
+before entering MINIX.*
 
 ## Filesystem Image
 
