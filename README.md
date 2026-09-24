@@ -23,6 +23,8 @@ mounts the native card as `/` and `/usr`; unlike DOSMINIX, it does not use a
 Release 1.0 includes:
 
 - a 48,103,424-byte whole-card image with a persistent native MINIX filesystem;
+- a compact 31,981,568-byte image with the same system and approximately
+  8.7 MiB free on `/usr`;
 - the exact nine-file `MNXBOOT` DOS bundle proven on the hardware;
 - Mack's HP 200LX-compatible MINIX kernel;
 - Richard Dubs's PCMCIA and BIOS INT 13 bridge;
@@ -31,7 +33,7 @@ Release 1.0 includes:
 - `/etc/issue`: `MINIX Release 2.0 Version 2 - HP 200LX kernel`;
 - Mack's `volts` utility in `/usr/local/bin`.
 
-The release image starts cleanly without an unnecessary first-boot filesystem
+Both release images start cleanly without an unnecessary first-boot filesystem
 check. A genuinely unclean later shutdown still triggers MINIX's normal check.
 
 ![Logged into persistent MINIX on the HP 200LX](docs/media/logged-in.jpg)
@@ -78,9 +80,11 @@ MINIX and ELKS kernels.
   recover its conventional memory, and avoid changing the MINIX handoff.
 - The CF card may remain inserted while rebooting into DOS; `MNXBOOT.BAT`
   reinitializes it before entering MINIX.
-- The same Release 1.0 image boots from both 48 MB and 256 MB CF cards. The card
-  does not need to be a particular model or exact size, but it must be at least
-  48,103,424 bytes and compatible with the HP 200LX PCMCIA adapter.
+- The 48 MB Release 1.0 image boots from both 48 MB and 256 MB CF cards.
+- The compact 32 MB image also boots on real HP 200LX hardware. It was validated
+  on the same 48 MB CF card and fits media at least 31,981,568 bytes in size.
+- The card does not need to be a particular model or exact size, but it must be
+  compatible with the HP 200LX PCMCIA adapter.
 - `volts` reports the main-battery voltage. It omits the decimal point, so
   `243` means approximately 2.43 V.
 
@@ -93,8 +97,8 @@ of a volt.*
 
 - The HP ON/OFF function may work once, but resuming can hang. Do not rely on
   suspend/resume; save files, run `sync`, and shut down normally.
-- CF cards and adapters vary; Release 1.0 has been tested with 48 MB and 256 MB
-  cards, but not every available model.
+- CF cards and adapters vary. The 48 MB and 256 MB cards have been tested, but
+  the compact image has not yet been tested on a physical 32 MB card.
 - PCMCIA networking is not included or validated.
 - This is a research build for vintage hardware, not a maintained secure OS.
 
@@ -104,15 +108,16 @@ You need:
 
 - an HP 200LX that can boot to its internal DOS `C:` drive;
 - enough internal DOS space for the `MNXBOOT` directory;
-- a compatible PCMCIA/CF card at least 48,103,424 bytes in size;
+- a compatible PCMCIA/CF card at least 31,981,568 bytes in size for the compact
+  image, or 48,103,424 bytes for the original image;
 - a separate DOS-readable transfer card or another way to copy files to `C:`.
 
-1. Download both Release 1.0 assets:
-   - `HP200LX-MINIX-2.0.2-native-1.0.img`
-   - `MNXBOOT-Release-1.0.zip`
+1. Download `MNXBOOT-Release-1.0.zip` and one Release 1.0 image:
+   - `HP200LX-MINIX-2.0.2-native-1.0-32MB.img` for the compact edition; or
+   - `HP200LX-MINIX-2.0.2-native-1.0.img` for the original 48 MB edition.
 2. Verify their SHA-256 checksums from the release page.
-3. Write the `.img` to the entire CF device, not to a partition. Capacity beyond
-   the 48,103,424-byte image remains unused.
+3. Write the selected `.img` to the entire CF device, not to a partition.
+   Capacity beyond the image remains unused.
 4. Extract the boot ZIP and copy its `MNXBOOT` directory to `C:\MNXBOOT` on
    the HP 200LX internal DOS drive.
 5. Insert the imaged native MINIX CF card.
@@ -160,9 +165,10 @@ before entering MINIX.*
 
 ## Filesystem Image
 
-The card uses a bootable type-81 MINIX partition beginning at sector 32. It
-contains separate root and `/usr` filesystems and mounts them as `/dev/hd1`
-and `/dev/hd1b`.
+Both images use a bootable type-81 MINIX partition beginning at sector 32. They
+contain separate root and `/usr` filesystems and mount them as `/dev/hd1` and
+`/dev/hd1b`. The compact image preserves the complete Release 1.0 system while
+reducing `/usr` from 39,520 to 29,280 blocks.
 
 See [docs/IMAGE-LAYOUT.md](docs/IMAGE-LAYOUT.md) for exact offsets, sizes, and
 verification details.
