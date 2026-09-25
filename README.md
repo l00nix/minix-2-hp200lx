@@ -107,7 +107,8 @@ of a volt.*
 You need:
 
 - an HP 200LX that can boot to its internal DOS `C:` drive;
-- enough internal DOS space for the `MNXBOOT` directory;
+- at least 130 KB of free internal DOS space on `C:` for the `MNXBOOT`
+  directory (129,510 bytes across nine files);
 - a compatible PCMCIA/CF card at least 31,981,568 bytes in size for the compact
   image, or 48,103,424 bytes for the original image;
 - a separate DOS-readable transfer card or another way to copy files to `C:`.
